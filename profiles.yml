@@ -1,0 +1,12 @@
+default: 
+  description: default profile to check if deduper works
+  input:
+   - dir: '/home/maurice/projects/dedupe'
+   - single: '/home/maurice/projects/dedupe'
+#  strategy: file #optional
+  selectmajor: lastModified
+  action: delete
+#  logger: debug #todo don't know yet what config will do
+maurice:
+  input:
+   - /home/maurice/projects/dedupe

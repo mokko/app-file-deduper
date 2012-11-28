@@ -1,0 +1,49 @@
+=head1 DESCRIPTION
+
+A command line app that helps you find, delete or otherwise deal with duplicate 
+files on your filesystem. 
+
+=head1 STATUS
+
+Work in progress!
+
+(I write this mainly to practice SQLite.)
+
+There are different ways to determine identity.
+Typically involving combinations of the following
+-same filename (ignoring directories)
+-same size
+-same content
+-same lastMod date
+
+I would say that the content test is the most reliable, but who know if someone
+someday wants to test lastMod and content?
+
+=head1 SEE ALSO
+
+File::Same
+File::is
+
+TERMINOLOGY
+-for simplicity i will assume that there are always only two identitical files
+although there can be more.
+-there are PAIRS of identical files
+-if they are identitical how can i determine which one is supposed to survive
+and which one unlinked?
+
+Simple mode.
+
+Scenario: I sometimes put files that I hesitate to throw away in a folder 
+called 'backup'. I really don't need the same file in these backup folders.
+So I could just delete those files which are the same. Sameness here is not
+file name or saved date etc., but some kind of CHECKSUM. I definitly want
+to be able to use different checksums for different purposes.
+
+INPUT
+The command line will expect a dir as input, but the module might also
+work with a list of files. Not sure if that makes sense.
+
+
+The simplest ACTION is to delete one of the two identical files, other
+options are to create a link to 
+ 

@@ -1,0 +1,41 @@
+#PODNAME: App::Dedupe::Layout.pod
+#ABSTRACT: lists and briefly describes App::Dedupe's important components
+=pod
+
+bin/dedupe.pl 
+    simple commandline frontend; 
+    has currently pod describing CLI interface 
+    possibly to be replaced by a more App::Cmd-style solution
+
+lib/App/Dedupe.pm 
+    main package
+    thanks to App::Cmd not much
+    i still don't get what goes here
+
+lib/App/Dedupe/Command.pm  
+    base class for App::Dedupe commands
+    required by App::Cmd? probably; possibly optional
+    not sure what this is for yet
+
+lib/App/Dedupe/ProfileDefinition.pm
+    specifies and documents the profile format 
+
+lib/App/Dedupe/Command/scan.pm
+    one of commands [not all of them listed in this overview]
+
+
+lib/File/Representation.pm 
+    describe files in a database generically
+    Write at later stage by abstraction from File::Representation::Deduper 
+
+lib/File/Representation/Dedupe.pm
+    Deduper-specific version of File::Representation
+
+=head1 ARCHITECTURE
+
+Let's use modern perl, App::Cmd and DBIx::Class this time.
+
+
+=head1 QUESTIONS
+
+Does App::Cmd activate strict, warnings and Moose for you? It doesn't.
