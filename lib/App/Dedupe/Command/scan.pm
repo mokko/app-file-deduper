@@ -9,20 +9,35 @@ use Carp qw(confess);
 
 #print __PACKAGE__." loaded\n";
 
-sub local_opt_spec {
-    return (
-        ["test|t",  "test"],
-    );
+#App::Dedupe::Auto::global_opt_specs looks for local_opt_spec
+#sub local_opt_spec {
+#    return (
+#        ["test|t",  "test"],
+#    );
+#}
+
+sub opt_spec {
+    my $self = shift;
+    return ["test|t", "test"];
 }
+
+sub validate_args {
+    print "validate args\n";
+}
+
 sub execute {
     my ($self, $opts, $args) = @_;
-    #print "scan execute\n";
+    print "scan execute $opts $args\n";
+
     #$self->init($opts, $args);
+    #print Dumper $self;
+    #print Dumper $self->app->global_options;
     exit;
 
     #my $files=File::Representation::Deduper->new ();
     #my $files->scan;
 }
+
 
 sub description {
     <<EOF;

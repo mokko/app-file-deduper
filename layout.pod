@@ -1,4 +1,4 @@
-#PODNAME: App::Dedupe::Layout.pod
+#PODNAME: App::Dedupe::Layout
 #ABSTRACT: lists and briefly describes App::Dedupe's important components
 =pod
 
@@ -33,8 +33,83 @@ lib/File/Representation/Dedupe.pm
 
 =head1 ARCHITECTURE
 
-Let's use modern perl, App::Cmd and DBIx::Class this time.
+Let's use modern perl, App::Cmd and DBIx::Class this time. 
 
+=head2 PLUGINS
+
+The key will be to have plugins which can overwrite functionality, e.g.
+
+
+Like in dzil, plugins will be selected in configuration file. Something like
+Plugins
+-Store::SQLite
+-B::C
+
+When config is read, I will have to load those plugins as
+  App::Deduper::Plugin::Store::SQLite
+  App::Deduper::Plugin::A::B
+
+use Class::Load. How do I
+
+Should I require interfaces with roles?
+
+
+
+In relation to this: we might need different modes of running:
+- continuous: performs scan, plan, do in one go
+- phases: scan, plan, do are separate cli commands
+- interactive? Ask before continue (not necessary)
+
+
+=over
+
+=item Scanner
+
+A scanner walks the files and directories collecting information on them.
+  Different scanners collect different pieces of information on each
+  item. Info is passed to the store.
+  
+=item Store  
+
+I was planning on storing info in a SQLite db. But we could allow other stores, 
+esp. in memory for small sets of files. Gets info from scanner, stores it in 
+store and makes it accessible I guess
+
+=item Decision: Identity Logarithm
+
+Given the info in the store, the logarithm decides which files are duplicates, 
+e. g.
+    checksum or 
+    checksum only for files which are same size etc.
+
+=item Decision: Survivor/Original
+
+Given the info that a set of files are duplicates, decide which one of them 
+will be kept ('will survive') and which are only clones (that could be 
+deleted etc.).
+
+The newest file? The one with the shortest path? A random one?
+
+=item Decision: Actions
+
+Given we know a set of duplicates and which one file we want to keep, what 
+should we do with the rest? Typical candidates would a) replace with a link
+to the original and or delete the clones. 
+
+=item Planner
+
+The planner should take available info and display for each file what the 
+verdict is
+
+file1 individual  - HASH -  [implicitly do nothing]
+file2 duplicate[orig] - HASH - keep
+file3 duplicate[clone] - HASH - remove|replace with link to original
+
+Depending on configuration it's possible that there is no hash. 
+
+The question here was if we keep the info from the planner and store it 
+somewhere or if we regenerate it during the next run for do? I opted for the 
+latter. The less stat the better, see cpanm.
 
 =head1 QUESTIONS
 

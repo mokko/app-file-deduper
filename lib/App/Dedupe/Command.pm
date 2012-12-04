@@ -10,10 +10,24 @@ use YAML::Any qw(LoadFile);
 use Params::Check qw(check last_error);
 
 #print __PACKAGE__." loaded\n";
+sub default_args {
+    'default';
+}
 
 #this validate_args will be called in all commands unless locally overriden
 sub validate_args {
     my ($self, $opts, $args) = @_;
+    my $g_opts=$self->app->global_options;
+    #my @keys=keys %{$g_opts};
+    #print 'G'.$keys[0].':'.$g_opts->{$keys[0]}."\n" ; #Dumper ;
+
+    if ($g_opts->{verbose}) {
+        print "VVVVVVVVVVerbose:".$g_opts->{verbose}."\n";
+    } 
+
+    print 'L'.Dumper $opts;
+    
+    
     print "validate_args (and opts)\n";
 
     #show me what you got
@@ -31,11 +45,9 @@ sub validate_args {
     }
 
     #$self->check_args($args);
-    $self->{active_profiles} = $args;
+    #$self->{active_profiles} = $args;
 
 }
-
-
 
 
 #sub default_args {

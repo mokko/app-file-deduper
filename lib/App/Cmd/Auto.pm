@@ -3,8 +3,7 @@ package App::Cmd::Auto;
 
 use strict;
 use warnings;
-use Data::Dumper;
-
+use Data::Dumper; #debugging
 print __PACKAGE__. " loaded\n";
 
 =head1 SYNOPSIS
