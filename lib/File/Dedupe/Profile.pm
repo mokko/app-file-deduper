@@ -1,8 +1,7 @@
-package App::Dedupe::ProfileDefinition;
-
 #ABSTRACT: Define profiles in the config file
+package File::Dedupe::Profile;
 
-our $requiredDirectives = {
+our $spec = {
     action => {    #what to do with duplicates
         allow    => ['delete', 'link'],
         required => 1,
@@ -26,10 +25,6 @@ our $requiredDirectives = {
             },
             $_
         ],
-    },
-    logger => {    #Todo. Specify log level. Defaults to "error"
-        allow   => ['info', 'warn', 'error', 'debug', '...'],
-        default => 'error',
     },
     selectmajor => {    #which file in a set of duplicates survives
         allow   => ['lastModified', 'newest', 'oldest'],

@@ -3,18 +3,22 @@ package File::Deduper;
 use strict;
 use warnings;
 
-use Moose;
 use Cwd qw(realpath);
 use File::Spec;
 use Carp qw (croak);
 use Try::Tiny;
 #use App::File::Deduper::ORLite;
 #use App::File::Deduper::ORLite::File;
-use Data::Dumper qw(Dumper);    #only for debug
-use Log::Log4perl qw(get_logger);
+#use Data::Dumper qw(Dumper);    #only for debug
+#use Log::Log4perl qw(get_logger);
 
 #use App::File::Deduper::List;
-use parent 'App::File::Deduper::Urclass';
+#use parent 'App::File::Deduper::Urclass';
+
+use Moose;
+with 'File::Dedupe::Role::Config';
+
+
 
 has 'action'    => ( is => 'ro', isa => 'Str',  default => 'delete' );
 has 'algorithm' => ( is => 'ro', isa => 'Str',  default => 'MD5' );

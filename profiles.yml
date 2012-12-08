@@ -1,12 +1,16 @@
+main:
+  log_path: foo
+  bla: bar
 default: 
   description: default profile to check if deduper works
+  action: delete
   input:
    - dir: '/home/maurice/projects/dedupe'
    - single: '/home/maurice/projects/dedupe'
 #  strategy: file #optional
   selectmajor: lastModified
-  action: delete
 #  logger: debug #todo don't know yet what config will do
 maurice:
+  action: delete
   input:
-   - /home/maurice/projects/dedupe
+   - dir: '/home/maurice/projects/dedupe'
