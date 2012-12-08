@@ -1,0 +1,55 @@
+#PODNAME: Phases
+#ABSTRACT: Descriptiong of File::Dedupe's Phases
+=head1 Phases
+
+File::Dedupe's phases describe the places where you plug into and how.
+
+=head2 Scan
+
+Scan takes input items from configuration, scans those files and directories so
+that at the end of the scan all items in the filesystem are described in the 
+store and only those. 
+
+Scan may include mechanisms to speed up the process by not repeating checksum 
+scans on unchanged items.
+
+ Phase name: scan
+ Input: input items from active profile
+ Output: writes/updates store
+
+At this point no subphases are defined. But I might define some in the future.
+
+=head2 Possible Subphases 
+
+=over 1
+
+=item a) scan_quick
+
+Initial scan of file system which determines information that is quickly 
+determined. Such as filepath, -X operators
+
+Input: intput items from active profile
+Output: in-memory file representation
+
+There should be a mechanism eventually which allows to save info to store
+when X files are scanned (to prevent the in-memory store to get to consume
+too much memory).
+
+=item b) scan_update_decide
+
+Based on the information from the quick_scan and the store, decide whether 
+store needs update. 
+
+=item c) scan_update
+
+Update for items which need updating. Includes a checksum.
+
+=item d) scan_wipe
+
+Remove items from database which have no representation on disk anymore.
+
+=back
+
+=
+
+=cut

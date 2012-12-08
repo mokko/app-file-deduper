@@ -6,6 +6,7 @@ default:
   action: delete
   input:
    - dir: '/home/maurice/projects/dedupe' #recursive
+   - dir: '/home/maurice/projects/dedupe' #recursive
    - single_dir: '/home/maurice/projects/dedupe' #only one dir
    - file: '/home/maurice/projects/dedupe/README.pod'
 #  strategy: file #optional

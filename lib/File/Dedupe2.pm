@@ -3,6 +3,7 @@ package File::Dedupe2;
 use strict;
 use warnings;
 use Data::Dumper;    #debugging
+use Plugin::Simple qw(scan);
 use Moose;
 with 'File::Dedupe::Role::Config';
 
@@ -37,22 +38,72 @@ out duplicates on this level. This is populated during scan_input.
 
 =cut
 
-has 'file_list' => (
-    is   => 'rw',
-    isa  => 'HashRef',
+has 'filelist' => (
+    is      => 'ro',
+    isa     => 'HashRef',
+    default => sub { {} },
+
     #builder=>scan_input
 );
 
 
-sub scan_input {
-    my $self = shift;
-    print "scan_input!!!!!!!\n";
-    print Dumper $self->active_config;
-    #my $input = $self->active_config->{input} or $self->log_fatal('Input missing');
-    #foreach
+has 'plugin_system' => (
+    is      => 'ro',
+    isa     => 'Plugin::Simple',
+    lazy    => 1,
+    builder => '_build_plugin_system',
+);
 
+
+sub _build_plugin_system {
+    my $self = shift;
+    my $ps = Plugin::Simple->new(phases => ['scan']);
+
+    #currently i have to load the default plugins
+    #later i have to load plugins from the current profile
+    #Anyways, should I unregister defaults?
+    #Would be more elegant if load defaults only if profile doesn't
+    #specify an alternative
+
+    $self->log('Register File::Dedupe::Plugin::Scan::Default');
+    $ps->register('File::Dedupe::Plugin::Scan::Default');
+    return $ps;
+}
+
+
+#
+# METHODS
+#
+
+
+=method $filelist=$self->scan_input;
+
+Takes as input the active_config and its input values and saves all files
+in input directories in $self->{filelist}; also returns filelist. Croaks
+on failure.
+
+=cut
+
+sub scan_input {
+    my $self  = shift;
+    my $input = $self->active_config('input')
+      or $self->log_fatal('Input missing');
+
+    #cant handover input only since it's an arrayRef
+    my @p = $self->plugin_system->execute('scan', $self->active_config);
+    foreach my $plugin (@p) {
+        my ($obj, $ret) = $self->plugin_system->return_value($plugin);
+        $self->{filelist}=$ret;
+    }
+    print Dumper $self->filelist;
+    return 1;
 
 }
+
+
+#
+# PRIVATE
+#
 
 
 1;

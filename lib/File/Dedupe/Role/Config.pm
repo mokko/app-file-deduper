@@ -84,6 +84,10 @@ sub _build_config {
             ]
         );
     }
+    
+    #Should I register plugins here?
+    #$self->register_plugins;    
+    
     return $config;    #builder needs return value
 }
 
@@ -105,13 +109,20 @@ has 'active_profile' => (
 
 
 =method my $href=$self->active_config;
-
-Returns the config hashref for the currently defined profile.
+  my $href=$self->active_config($key);
+Returns the config hashref for the currently defined profile. Optionally 
+accepts a key to return only part of the current profile.
 
 =cut
 
 sub active_config {
-    return $_[0]->{config}{$_[0]->active_profile};
+    my $self = shift;
+    my $key  = shift;
+    if ($key) {
+        #return if (!defined $self->config->{$self->active_profile}{$key});
+        return $self->config->{$self->active_profile}{$key};
+    }
+    return $self->config->{$self->active_profile};
 }
 
 1;

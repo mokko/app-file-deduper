@@ -1,16 +1,17 @@
 #ABSTRACT: Define profiles in the config file
 package File::Dedupe::Profile;
+use Params::Check;
 
 our $spec = {
+
     #what to do with duplicates
-    action => {    
+    action => {
         allow    => ['delete', 'link'],
         required => 1,
     },
+
     #plain text describing the profile for humans
-    description => {    
-        required => 0,
-    },
+    description => {required => 0,},
 
     #directories and files which will be scanned for duplicates
     #dir: recursive directories
@@ -20,24 +21,33 @@ our $spec = {
         required => 1,
         allow    => [
             sub {
-                my $var = shift;
+                my $var  = shift;
+                my $keep = $Params::Check::ONLY_ALLOW_DEFINED;
+                $Params::Check::ONLY_ALLOW_DEFINED = 1;
                 foreach my $hash (@{$var}) {
-                    my %hash = %{$hash};
-                    die "unrecognized input type: '" . (keys %hash)[0] . "'"
-                      unless ($hash{dir} or $hash{single_dir} or $hash{file});
+                    Params::Check::check(
+                        {   dir        => {},
+                            single_dir => {},
+                            file       => {}
+                        },
+                        $hash, 1
+                    );
                 }
+                $Params::Check::ONLY_ALLOW_DEFINED = $keep;
                 return 1;
             },
             $_
         ],
     },
+
     #which file in a set of duplicates survives
-    selectmajor => {    
+    selectmajor => {
         allow   => ['lastModified', 'newest', 'oldest'],
         default => 'lastModified',
     },
+
     #todo. I could look for directories which are identical
-    strategy => {       
+    strategy => {
         allow => ['file', 'dir'],    #optional, default 'file'
         default => 'file',
     }
