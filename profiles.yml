@@ -1,12 +1,13 @@
 main:
-  log_path: foo
-  bla: bar
+  log_path: foo #todo
+  bla: bar #todo
 default: 
   description: default profile to check if deduper works
   action: delete
   input:
-   - dir: '/home/maurice/projects/dedupe'
-   - single: '/home/maurice/projects/dedupe'
+   - dir: '/home/maurice/projects/dedupe' #recursive
+   - single_dir: '/home/maurice/projects/dedupe' #only one dir
+   - file: '/home/maurice/projects/dedupe/README.pod'
 #  strategy: file #optional
   selectmajor: lastModified
 #  logger: debug #todo don't know yet what config will do

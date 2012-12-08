@@ -2,16 +2,21 @@
 package File::Dedupe::Profile;
 
 our $spec = {
-    action => {    #what to do with duplicates
+    #what to do with duplicates
+    action => {    
         allow    => ['delete', 'link'],
         required => 1,
     },
-    description => {    #a plain text description of the profile
+    #plain text describing the profile for humans
+    description => {    
         required => 0,
     },
-    input => {          #either "dir" (recursive directories) or "single" for
 
-        #non-recursive directories or files
+    #directories and files which will be scanned for duplicates
+    #dir: recursive directories
+    #single_dir: dir non-recursively
+    #file: single file
+    input => {
         required => 1,
         allow    => [
             sub {
@@ -19,20 +24,20 @@ our $spec = {
                 foreach my $hash (@{$var}) {
                     my %hash = %{$hash};
                     die "unrecognized input type: '" . (keys %hash)[0] . "'"
-                      unless ($hash{dir} or $hash{single});
+                      unless ($hash{dir} or $hash{single_dir} or $hash{file});
                 }
                 return 1;
             },
             $_
         ],
     },
-    selectmajor => {    #which file in a set of duplicates survives
+    #which file in a set of duplicates survives
+    selectmajor => {    
         allow   => ['lastModified', 'newest', 'oldest'],
         default => 'lastModified',
     },
-    strategy => {       #todo. I could look for directories which are identical
-
-        # but presently I look only for identical files
+    #todo. I could look for directories which are identical
+    strategy => {       
         allow => ['file', 'dir'],    #optional, default 'file'
         default => 'file',
     }
