@@ -5,7 +5,11 @@ use warnings;
 use File::Spec;
 use Log::Dispatchouli;
 use Moose::Role;
+use Time::HiRes 'gettimeofday', 'tv_interval';
+
 #use Data::Dumper;
+#starts timer only when Role::Logger is applied, but who cares...
+our $start_time = [gettimeofday()];
 
 =head1 SYNOPSIS
 
@@ -46,6 +50,8 @@ runtime use $self->{logger}->set_debug ($bool) instead.
 
 has 'debug' => (is => 'ro', isa => 'Bool', default => 0);
 
+#has 'start_time'=>(is =>'ro', default =>sub {[gettimeofday()]});
+
 =attr logger
 
 stores a Log::Dispatchouli object with default values and handles 
@@ -73,10 +79,23 @@ sub _build_logger {
         to_stdout => 1,
         log_path => File::Spec->catfile($ENV{HOME}, '/', '.dedupe'),
         log_file => 'dedupe.log',
+        log_pid  => 0,
     };
 
     $args->{debug} = 1 if ($_[0]->{debug});
-    $_[0]->{logger} = Log::Dispatchouli->new($args);
+    my $logger = Log::Dispatchouli->new($args);
+    $logger->set_prefix(
+        sub { return interval() . ': ' . $_[0]; }
+    );
+    return $logger;
+
+}
+
+#shamelessly from Dancer::Timer. Thanks!
+sub interval {
+    my $now = [gettimeofday()];
+    my $delay = tv_interval($start_time, $now);
+    return sprintf('%0f', $delay);
 }
 
 

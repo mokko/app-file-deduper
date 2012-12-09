@@ -21,35 +21,45 @@ At this point no subphases are defined. But I might define some in the future.
 
 =head2 Possible Subphases 
 
+Either this is all one plugin or we have plugins calling plugins. So modularity
+we better use different plugins.
+
+ 
 =over 1
 
-=item a) scan_quick
+=item a) ScanMonitored (for all files)
 
-Initial scan of file system which determines information that is quickly 
-determined. Such as filepath, -X operators
+Proposed new initial scan which determines only monitored files. Takes
+input info from current profile and calls C<scan_compare> for each file it 
+encounters. 
 
-Input: intput items from active profile
-Output: in-memory file representation
+(We might want to keep track of encountered items for use in wipe. Should
+that be on db or in memory? In memory we would just use a hash. If we store
+that info in db, we would use a 'last_seen' column with date/time/epoch info.)
 
-There should be a mechanism eventually which allows to save info to store
-when X files are scanned (to prevent the in-memory store to get to consume
-too much memory).
+(Can the filelist and the store be the same structure? Yes! Seems like a waste 
+to have two similar structures? Also, it seems better design to trigger 
+comparison and scanner all in one walk thru.)
 
-=item b) scan_update_decide
+=item b) ScanCompare (for each file)
 
-Based on the information from the quick_scan and the store, decide whether 
-store needs update. 
+-if file not yet stored, it needs to be stored
+-if file is already stored, but mtime changed, it needs to be stored again
 
-=item c) scan_update
+=item c) ScanStore (for each file that needs to be updated in store)
 
-Update for items which need updating. Includes a checksum.
+Gets called from scan_compare for specific files which need storage. 
+Describe the files and save description in store (db).
 
-=item d) scan_wipe
+=item d) ScanWipe (for all items in db). 
 
-Remove items from database which have no representation on disk anymore.
+Walk thru all the files in db check if they still exist on harddisk or as part 
+of monitored directories. It would speed up things if we had access to filelist
+from step scan_filelist.
+
+With a last_seen column in the db, we would delete all items where last_seen is 
+older than the last scan.
 
 =back
-
-=
 
 =cut

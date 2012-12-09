@@ -57,7 +57,7 @@ has 'plugin_system' => (
 
 sub _build_plugin_system {
     my $self = shift;
-    my $ps = Plugin::Simple->new(phases => ['scan']);
+    my $ps = Plugin::Simple->new(phases => ['Scan']);
 
     #currently i have to load the default plugins
     #later i have to load plugins from the current profile
@@ -65,8 +65,7 @@ sub _build_plugin_system {
     #Would be more elegant if load defaults only if profile doesn't
     #specify an alternative
 
-    $self->log('Register File::Dedupe::Plugin::Scan::Default');
-    $ps->register('File::Dedupe::Plugin::Scan::Default');
+    $ps->register('File::Dedupe::Plugin::ScanDefault');
     return $ps;
 }
 
@@ -90,12 +89,12 @@ sub scan_input {
       or $self->log_fatal('Input missing');
 
     #cant handover input only since it's an arrayRef
-    my @p = $self->plugin_system->execute('scan', $self->active_config);
-    foreach my $plugin (@p) {
-        my ($obj, $ret) = $self->plugin_system->return_value($plugin);
-        $self->{filelist}=$ret;
-    }
-    print Dumper $self->filelist;
+    my @p = $self->plugin_system->execute(phase=>'Scan', core=>$self, );
+#    foreach my $plugin (@p) {
+#        my ($obj, $ret) = $self->plugin_system->return_value($plugin);
+#        $self->{filelist}=$ret;
+#    }
+#   print Dumper $self->filelist;
     return 1;
 
 }
