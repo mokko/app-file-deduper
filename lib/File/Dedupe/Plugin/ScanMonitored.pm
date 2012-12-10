@@ -34,12 +34,17 @@ sub BUILD {
 #at this point it is already tested to be a file NOT
 sub _inputFile {
     my $self = shift;
-    my $file = shift or die "Need file";
+    my $file = shift or confess "Need file";
 
-    $file = realpath($file);
+    $file = realpath($file); #absolute path...
+    if (-f $file) {
+       #$store->add_file($file);
+       #describes the file and stores info in db(store);
+       #$self->core->plugin_system->execute (
+       #phase=>'ScanCompare', core=>$core, file=>file$
+       #);         
+    }
 
-    #print " addFile : $file \n ";
-    $self->{filelist}{$file}++;    #number is irrelevant
 }
 
 sub _inputDir {
@@ -49,9 +54,11 @@ sub _inputDir {
 
     #my very first manual recursive directory lookup. Yay!
     #$self->log_debug ("readdir $dir");
+    if (!-d $dir) {
+        $self->core->log_fatal ("item is no directory: $dir");
+    }
     opendir(my $DH, $dir) or die " Cannot opendir '$dir' : $! ";
 
-    #doesn't work with while. Don't know why.
     foreach my $entry (readdir($DH)) {
         next if ($entry =~ /^\./);    #sort out . .. and dotfiles
         $entry = File::Spec->catfile($dir, $entry);

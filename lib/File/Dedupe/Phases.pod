@@ -30,7 +30,7 @@ we better use different plugins.
 =item a) ScanMonitored (for all files)
 
 Proposed new initial scan which determines only monitored files. Takes
-input info from current profile and calls C<scan_compare> for each file it 
+input info from current profile and calls C<ScanCompare> for each file it 
 encounters. 
 
 (We might want to keep track of encountered items for use in wipe. Should
@@ -48,7 +48,7 @@ comparison and scanner all in one walk thru.)
 
 =item c) ScanStore (for each file that needs to be updated in store)
 
-Gets called from scan_compare for specific files which need storage. 
+Gets called from C<ScanCompare> for specific files which need storage. 
 Describe the files and save description in store (db).
 
 =item d) ScanWipe (for all items in db). 
