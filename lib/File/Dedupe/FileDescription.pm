@@ -2,8 +2,8 @@
 package File::Dedupe::FileDescription;
 use strict;
 use warnings;
-use Digest::file qw(digest_file_hex);
-use Cwd 'abs_path';
+use Digest::file 'digest_file_hex';
+use Cwd 'realpath';
 use Moose;
 use namespace::autoclean;
 #with 'File::Dedupe::Role::Types';    #not necessary due to Moose's global types
@@ -17,7 +17,7 @@ use namespace::autoclean;
 
   #restore fileDescription with info saved saved in db etc.
   $file=File::Dedupe::FileDescription->new(
-    path=>$abs_path,
+    path=>$realpath,
     checksum_type=>'MD5',
     lastSeen=>$lastSeen,
     writable=>1,
@@ -35,7 +35,7 @@ use namespace::autoclean;
   $file->size; #bytes
   $file->mtime; #seconds since epoch
   
-  #
+  #other
   $file->action; #not sure about that yet; not really a file description
 
   #setters
@@ -60,13 +60,13 @@ unique.
 
 =cut
 
-#abs_path only works for existing files, so I don't have to check
+#realpath only works for existing files, so I don't have to check
 #existence before. And cwd's error message is decent!
 has 'path' => (
     is       => 'ro',
     isa      => 'Str',
     required => 1,
-    trigger  => sub { $_[0]->{path} = abs_path($_[1]) },
+    trigger  => sub { $_[0]->{path} = realpath($_[1]) },
 );
 
 =attr checksum_type
@@ -133,6 +133,10 @@ Alternative constructor. You need path and you may specify checksum_type, all
 other values are filled-in automatically from the file that needs to be 
 described.
 
+=head3 Options
+  path=>$path
+  checksum_type=>'MD5'; #see attribute above
+
 =cut
 
 sub describe {
@@ -159,7 +163,10 @@ sub describe {
 
 =method my $href=$file->hashref;
 
-returns a copy of the objects content as hashref.
+returns a copy(?) of the object's content as hashref.
+
+It might actually be a reference...
+TODO: Check!
 
 =cut
 

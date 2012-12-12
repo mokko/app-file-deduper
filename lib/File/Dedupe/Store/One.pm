@@ -20,7 +20,7 @@ has 'dbh' => (is => 'ro', isa => 'Object');
 
   my $store=File::Dedupe::Store::One->new(%args);
   $store->create ($path);
-  my $file=$store->retrieve ($path); #returns undef if path doesn't exist
+  my $file=$store->read ($path); #returns undef if path doesn't exist
   $store->update ($path);
   $store->delete ($path);
 
@@ -37,7 +37,20 @@ sub BUILD {
 
 }
 
-=method $self->retrieve ($path);
+=method $self->create ($path);
+=cut
+ 
+sub create {
+    my $self = shift or return;
+    my $path = shift or return; #relative path is ok...
+
+    my $file = File::Dedupe::FileDescription->describe(path => $path);
+    my ($stmt, @bind) = SQL::Abstract->new->insert('files', $file->hashref);
+    $self->_execute_sql($stmt, @bind);
+}
+
+
+=method $self->read ($path);
 
 Expects a path (absolute or relative, although you can't specify a relative path of 
 file which doesn't exist anymore).
@@ -46,7 +59,7 @@ Returns a File::Dedupe::FileDescription object with data from the store.
 
 =cut
 
-sub retrieve {
+sub read {
     my $self = shift;
     my $path = _realpath(shift) or return;
 
@@ -68,17 +81,6 @@ sub retrieve {
     return File::Dedupe::FileDescription->new(%{$result});
 }
 
-sub create {
-    my $self = shift or return;
-    my $path = shift or return;
-
-#my $file = File::Dedupe::FileDescription->new (path=>$path);
-#should I check if file has the right content? No, I will just use Moose to do that
-#File::Dedupe::FileDescription?
-    my $file = File::Dedupe::FileDescription->describe(path => $path);
-    my ($stmt, @bind) = SQL::Abstract->new->insert('files', $file->hashref);
-    $self->_execute_sql($stmt, @bind);
-}
 
 =method $self->update ($path);
 

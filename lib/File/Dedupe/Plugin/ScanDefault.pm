@@ -4,37 +4,27 @@ use warnings;
 use Data::Dumper;    #debugging
 use Carp 'confess';
 use Cwd qw(realpath);
-
-#use Scalar::Util qw(blessed);
 use Moose;
-with 'File::Dedupe::Role::Plugin';
+with 'File::Dedupe::Role::Plugin'; #requires core...
+#use Scalar::Util qw(blessed);
+
+#
+# This is a plugin bundle, i.e. a plugin which calls other plugins
+# It's also a default plugin, so it gets called unless you overwride
+# it somewhere in your configuration file (todo)
+#
 
 sub BUILD {
     my $self = shift;
-
     my $ps = $self->core->plugin_system;
 
-    $ps->add_phase(
-        qw(
-          ScanMonitored
-          ScanCompare
-          ScanStore
-          ScanWipe)
-    );
+    $ps->register(plugin => 'ScanMonitored', core=>$self->core);
+    $ps->register(plugin => 'ScanCompare', core=>$self->core);
+    $ps->register(plugin => 'ScanStore', core=>$self->core);
+    $ps->register(plugin => 'ScanWipe', core=>$self->core);
 
-    $ps->register('File::Dedupe::Plugin::ScanMonitored');
-    $ps->register('File::Dedupe::Plugin::ScanCompare');
-    $ps->register('File::Dedupe::Plugin::ScanStore');
-    $ps->register('File::Dedupe::Plugin::ScanWipe');
-
-    $self->core->plugin_system->execute(
-        phase   => 'ScanMonitored',
-        core => $self->core,
-    );
-
+    #perhaps I don't need to do any methods?
 }
 
-#it is possible to overwrite a role model? appearantly
-sub phase {'Scan'};
 
 1;
