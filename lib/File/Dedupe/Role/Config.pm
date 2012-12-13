@@ -4,25 +4,39 @@ package File::Dedupe::Role::Config;
 use strict;
 use warnings;
 
-#use Moose::Util::TypeConstraints;
 use YAML::Any qw(LoadFile);
 use Params::Check;
-use File::Dedupe::Profile;
+use File::Dedupe::Profile;    #Profile specification for Params::Check
 use Carp qw(confess);
+use File::Spec;
 use Moose::Role;
 with 'File::Dedupe::Role::Logger';
 with 'File::Dedupe::Role::Types';
-use Data::Dumper;    #debugging
+use Data::Dumper;             #debugging
 
 
 =head1 SYNOPSIS
 
     #in File::Dedupe or App::Dedupe
-    use File::Dedupe::Config;
-    my $config=File::Dedupe->new( #loads & validates config
-        file=>$fn, debug=>1
+    with 'File::Dedupe::Config';
+
+    #loads & validates config 
+    #load from config_file
+    my $config=File::Dedupe->new( 
+        config_file=>$fn, debug=>1, active_profile=>$a
     ); 
 
+    #or ensure that config is already in place
+    my $config=File::Dedupe->new( 
+        config=>$config, active_profile=>$a
+    ); 
+
+    #access config values
+    my $value=$self->config->{key};
+    
+    #shortcut for $self->config->{$self->active_profile}
+    $hashref=$self->active_config;
+    
 
 What should config do on failure? I can warn, croak, confess. I think this 
 class shouldn't talk to the end user directly. So none of the above. It's a 
@@ -31,27 +45,35 @@ object ($self->error)?
     
 =attr file
 
-    config file location, e.g /home/You/conf.yml 
+    config file location, e.g /home/You/conf.yml. It's required unless you
+    hand over an already validated config hashref during construction. 
 
 =cut
 
 has 'config_file' => (
-    is       => 'ro',
-    isa      => 'FileExists',
-    required => 1
+    is            => 'ro',
+    isa           => 'FileExists',
+    documentation => 'Filepath to main configuration file.',
+    required      => 0,
 );
+
+=attr config
+
+=cut
 
 has 'config' => (
-    is      => 'ro',
-    isa     => 'HashRef',
-    builder => '_build_config',
-    lazy    => 1
+    is            => 'ro',
+    isa           => 'HashRef',
+    builder       => '_build_config',
+    required      => 1,
+    lazy          => 1,
+    documentation => 'HashRef containing configuration.',
 );
 
+#load config_file, check if it is good, and write it to $self->{config}
 sub _build_config {
     my $self = shift;
 
-    #load config, check if it is good, and return it as object.
     my $config;
     if (!$self->{config_file}) {
         $self->log_fatal('Need a config file!');
@@ -84,10 +106,25 @@ sub _build_config {
             ]
         );
     }
-    
-    #Should I register plugins here?
-    #$self->register_plugins;    
-    
+
+    #defaults can be overwritten from configuration file
+    #keep logfile out of configuration file
+    my $mydir = path($ENV{HOME}, '.dedupe');
+    my %defaults = (
+        mydir    => $mydir,
+        dbfile   => path($mydir, 'dedupe.db'),
+        profiles => path($mydir, 'profiles.yml'),
+
+        #useless? Yes, unless I do this config role from App
+
+    );
+
+    foreach my $key (keys %defaults) {
+        if (!$config->{main}{$key}) {
+            $config->{main}{$key} = $defaults{$key};
+        }
+    }
+
     return $config;    #builder needs return value
 }
 
@@ -100,13 +137,16 @@ profile although it knows also the configuration of other profiles.
 =cut
 
 has 'active_profile' => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => 'default',
-
-#    required => 1,
+    is            => 'ro',
+    isa           => 'Str',
+    default       => 'default',
+    required      => 1,
+    documentation => 'Name of currently active profile.'
 );
 
+#
+# METHODS
+#
 
 =method my $href=$self->active_config;
   my $href=$self->active_config($key);
@@ -119,11 +159,18 @@ sub active_config {
     my $self = shift;
     my $key  = shift;
     if ($key) {
+
         #return if (!defined $self->config->{$self->active_profile}{$key});
         return $self->config->{$self->active_profile}{$key};
     }
     return $self->config->{$self->active_profile};
 }
+
+
+
+#
+# PRIVATE
+#
 
 1;
 

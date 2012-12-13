@@ -31,11 +31,11 @@ sub BUILD {
     return $self->{filelist};
 }
 
-#at this point it is already tested to be a file NOT
 sub _inputFile {
     my $self = shift;
     my $file = shift or confess "Need file";
 
+    #realpath works only for existing files (implicit -f test)
     $file = realpath($file); #absolute path...
     if (-f $file) {
        #$store->add_file($file);

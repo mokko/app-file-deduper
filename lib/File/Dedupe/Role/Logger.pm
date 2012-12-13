@@ -50,7 +50,26 @@ runtime use $self->{logger}->set_debug ($bool) instead.
 
 has 'debug' => (is => 'ro', isa => 'Bool', default => 0);
 
-#has 'start_time'=>(is =>'ro', default =>sub {[gettimeofday()]});
+=attr logfile
+
+Full path to logfile as an array. First item contains directory, second
+the base filename, so that together it's a complete path. Defaults to
+
+    $ENV{HOME}/.dedupe/dedupe.log 
+
+The separator is specific for your OS.
+
+=cut
+
+has 'logfile' => (
+    is       => 'ro',
+    isa      => 'ArrayRef[Str]',
+    required => 0,
+    default  => sub {
+        [path($ENV{HOME}, '.dedupe'), 'dedupe.log']
+        ;
+    }
+);
 
 =attr logger
 
@@ -72,21 +91,24 @@ has 'logger' => (
 sub _build_logger {
 
     #log_path etc. should be defined elsewhere, of course
-    #or perhaps I can change it later?
+    #or perhaps be changed later, but there is a chicken egg problem:
+    #I want debug messages while loading the config, and I need a
+    #config value to setup logging...
+    #what is a clean solution?
+    #a) Keep logging info out of configuration file
+    #b) allow to configure path when logger is loaded by using attr
     my $args = {
-        ident     => __PACKAGE__,    #not sure about package yet...
+        ident     => __PACKAGE__,            #not sure about package yet...
         to_file   => 1,
         to_stdout => 1,
-        log_path => File::Spec->catfile($ENV{HOME}, '/', '.dedupe'),
-        log_file => 'dedupe.log',
-        log_pid  => 0,
+        log_path  => @{$_[0]->logfile}[0],
+        log_file  => @{$_[0]->logfile}[1],
+        log_pid   => 0,
     };
 
     $args->{debug} = 1 if ($_[0]->{debug});
     my $logger = Log::Dispatchouli->new($args);
-    $logger->set_prefix(
-        sub { return interval() . ': ' . $_[0]; }
-    );
+    $logger->set_prefix(sub { return interval() . ': ' . $_[0]; });
     return $logger;
 
 }
@@ -98,5 +120,9 @@ sub interval {
     return sprintf('%0f', $delay);
 }
 
+#Logger role seems not the right place, but not sure what should be right place...
+sub path {    #function!
+    File::Spec->catfile(@_);
+}
 
 1;

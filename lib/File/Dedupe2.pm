@@ -11,7 +11,10 @@ with 'File::Dedupe::Role::Config';
 =head1 SYNOPSIS
 
     use File::Dedupe;
-    my $deduper=File::Dedupe->new (%args);     #receives all the config that's necessary
+    my $deduper=File::Dedupe->new (
+        config=>$config,            #all the config that's necessary
+        config_file=>$config_file,  #or: file with configuration
+    );     
     
     #preliminary
     $deduper->scan_input; #dies or report error on failure? 
@@ -53,7 +56,7 @@ has 'plugin_system' => (
 
 sub _build_plugin_system {
     #log this to ensure that we're not re-making Plugin::Tiny all over again
-    #don't register plugins from within _build_plugin_system
+    #don't register plugins from within _build_plugin_system -> deep recursion
     $_[0]->log(__PACKAGE__ . "_build_plugin_system !!!!!!!!!!");
     Plugin::Tiny->new(
         prefix => 'File::Dedupe::Plugin::',

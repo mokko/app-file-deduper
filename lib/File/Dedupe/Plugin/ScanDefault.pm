@@ -18,6 +18,12 @@ sub BUILD {
     my $self = shift;
     my $ps = $self->core->plugin_system;
 
+    #will be in some other plugin eventually
+    my $dbfile=$self->core->config->{main}{dbfile};
+    use File::Dedupe::Store::One;
+    $self->core->{store}=File::Dedupe::Store::One->new(dbfile=>$dbfile);
+
+
     $ps->register(plugin => 'ScanMonitored', core=>$self->core);
     $ps->register(plugin => 'ScanCompare', core=>$self->core);
     $ps->register(plugin => 'ScanStore', core=>$self->core);
