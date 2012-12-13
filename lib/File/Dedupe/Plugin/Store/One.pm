@@ -1,5 +1,5 @@
 #ABSTRACT: Straight-foward no-frills store implementation with SQLite
-package File::Dedupe::Store::One;
+package File::Dedupe::Plugin::Store::One;
 use strict;
 use warnings;
 use Cwd 'realpath';
@@ -13,12 +13,12 @@ use File::Dedupe::FileDescription;
 use Moose;
 use namespace::autoclean;
 
-has 'dbfile' => (is => 'ro', isa => 'Str', required => 1);
-has 'dbh' => (is => 'ro', isa => 'Object');
+has 'dbfile' => (is => 'ro', isa => 'Str',    required => 1);
+has 'dbh'    => (is => 'ro', isa => 'Object', init_arg => undef);
 
 =head1 SYNOPSIS
 
-  my $store=File::Dedupe::Store::One->new(%args);
+  my $store=File::Dedupe::Plugin::Store::One->new(dbfile=>$dbfile);
   $store->create ($path);
   my $file=$store->read ($path); #returns undef if path doesn't exist
   $store->update ($path);
@@ -39,10 +39,10 @@ sub BUILD {
 
 =method $self->create ($path);
 =cut
- 
+
 sub create {
     my $self = shift or return;
-    my $path = shift or return; #relative path is ok...
+    my $path = shift or return;    #relative path is ok...
 
     my $file = File::Dedupe::FileDescription->describe(path => $path);
     my ($stmt, @bind) = SQL::Abstract->new->insert('files', $file->hashref);
@@ -93,7 +93,8 @@ sub update {
     my $self = shift;
     my $path = _realpath(shift) or return;
     my $file = File::Dedupe::FileDescription->describe(path => $path);
-    my ($stmt, @bind) = SQL::Abstract->new->update('files', $file->hashref, {path=>$path});
+    my ($stmt, @bind) =
+      SQL::Abstract->new->update('files', $file->hashref, {path => $path});
     $self->_execute_sql($stmt, @bind);
 }
 

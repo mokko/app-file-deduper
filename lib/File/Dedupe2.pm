@@ -54,6 +54,12 @@ has 'plugin_system' => (
     builder => '_build_plugin_system',
 );
 
+has 'store' => (
+    is            => 'ro',
+    isa           => 'Object',
+    documentation => 'store implemented by plugin during BUILD',
+    init_arg      => undef,
+);
 
 sub _build_plugin_system {
 
@@ -73,7 +79,10 @@ sub BUILD {
     #don't register inside of _build_plugin_system to avoid deep recursion
 
     #plugin defaults
-    my %plugins = ('Scan' => 'ScanDefault',);
+    my %plugins = (
+        'Scan'  => 'Scan::Default',
+        #'Store' => 'Store::One',
+    );
 
     #load plugins from configuration, overwrite defaults
     if ($self->config->{main}{plugins}) {
@@ -88,6 +97,7 @@ sub BUILD {
             core   => $self,
         );
     }
+
 }
 
 #

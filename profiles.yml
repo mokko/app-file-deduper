@@ -1,6 +1,6 @@
 main:
   plugins: 
-  - Scan: ScanDefault # adds 'File::Dedupe::Plugin::' automatically
+  - Scan: Scan::Default # adds 'File::Dedupe::Plugin::' automatically
 default: 
   description: default profile to check if deduper works
   action: delete
