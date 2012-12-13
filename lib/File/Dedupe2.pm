@@ -14,6 +14,7 @@ with 'File::Dedupe::Role::Config';
     my $deduper=File::Dedupe->new (
         config=>$config,            #all the config that's necessary
         config_file=>$config_file,  #or: file with configuration
+        logfile=>[$logdir, $logfile]#optional
     );     
     
     #preliminary
@@ -55,6 +56,7 @@ has 'plugin_system' => (
 
 
 sub _build_plugin_system {
+
     #log this to ensure that we're not re-making Plugin::Tiny all over again
     #don't register plugins from within _build_plugin_system -> deep recursion
     $_[0]->log(__PACKAGE__ . "_build_plugin_system !!!!!!!!!!");
@@ -67,21 +69,26 @@ sub _build_plugin_system {
 
 sub BUILD {
     my $self = shift;
+
     #don't register inside of _build_plugin_system to avoid deep recursion
 
-    #currently i have to load the default plugins
-    #later i have to load plugins from the current profile
-    #Anyways, should I unregister defaults?
-    #Would be more elegant if load defaults only if profile doesn't
-    #specify an alternative
-    $self->plugin_system->register(
-        phase  => 'Scan',
-        plugin => 'ScanDefault',
-        core   => $self,               #or plugin_system, config, logger
-    );
+    #plugin defaults
+    my %plugins = ('Scan' => 'ScanDefault',);
 
+    #load plugins from configuration, overwrite defaults
+    if ($self->config->{main}{plugins}) {
+        foreach my $pair (@{$self->config->{main}{plugins}}) {
+            map { $plugins{$_} = $pair->{$_} } (keys %{$pair});
+        }
+    }
+    foreach my $phase (keys %plugins) {
+        $self->plugin_system->register(
+            phase  => $phase,
+            plugin => $plugins{$phase},
+            core   => $self,
+        );
+    }
 }
-
 
 #
 # METHODS
@@ -108,7 +115,6 @@ sub scan_input {
       or confess 'Cannot get plugin';
 
     #return $scan_bundle->do();
-
     return 1;
 
 }

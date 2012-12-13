@@ -1,6 +1,6 @@
 main:
-  log_path: foo #todo
-  bla: bar #todo
+  plugins: 
+  - Scan: ScanDefault # adds 'File::Dedupe::Plugin::' automatically
 default: 
   description: default profile to check if deduper works
   action: delete
