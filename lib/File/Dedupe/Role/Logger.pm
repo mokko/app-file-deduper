@@ -66,8 +66,7 @@ has 'logfile' => (
     isa      => 'ArrayRef[Str]',
     required => 0,
     default  => sub {
-        [path($ENV{HOME}, '.dedupe'), 'dedupe.log']
-        ;
+        [path($ENV{HOME}, '.dedupe'), 'dedupe.log'];
     }
 );
 
@@ -88,7 +87,14 @@ has 'logger' => (
     handles => [qw(log log_debug log_fatal)],
 );
 
+has '_caller' => (is => 'ro', isa => 'ArrayRef', init_arg => undef);
+before 'log' => sub {
+    $_[0]->{_caller} = [caller(2)];
+};
+
+
 sub _build_logger {
+    my $self = shift;
 
     #log_path etc. should be defined elsewhere, of course
     #or perhaps be changed later, but there is a chicken egg problem:
@@ -101,16 +107,27 @@ sub _build_logger {
         ident     => __PACKAGE__,            #not sure about package yet...
         to_file   => 1,
         to_stdout => 1,
-        log_path  => @{$_[0]->logfile}[0],
-        log_file  => @{$_[0]->logfile}[1],
+        log_path  => @{$self->logfile}[0],
+        log_file  => @{$self->logfile}[1],
         log_pid   => 0,
     };
 
-    $args->{debug} = 1 if ($_[0]->{debug});
+    $args->{debug} = 1 if ($self->{debug});
     my $logger = Log::Dispatchouli->new($args);
-    $logger->set_prefix(sub { return interval() . ': ' . $_[0]; });
+    $logger->set_prefix(
+        sub {
+            if ($self->_caller) {
+                return
+                    interval() . ' '
+                  . $self->_caller->[0]
+                  . ' (line '
+                  . $self->_caller->[2] . '): '
+                  . $_[0];
+            }
+            return interval() . ' ' . $_[0];
+        }
+    );
     return $logger;
-
 }
 
 #shamelessly from Dancer::Timer. Thanks!

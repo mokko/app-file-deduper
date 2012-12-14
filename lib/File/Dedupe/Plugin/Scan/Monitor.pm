@@ -29,8 +29,18 @@ and launches the plugin with the phase 'ScanCampare' on each file it discovers.
 
 =cut
 
-sub BUILD {
-    
+has '_seen' => (
+    is       => 'ro',
+    isa      => 'HashRef',
+    default  => sub { {} },
+    init_arg => undef
+);
+
+#
+# Methods
+#
+
+sub BUILD {    #method modifer needs BUILD even if empty
 }
 
 sub scan {
@@ -40,7 +50,7 @@ sub scan {
         my $key   = (keys %{$item})[0];
         my $value = $item->{$key};
 
-        $self->core->log("$key:$value");
+        #$self->core->log("$key:$value");
 
         #check if I should do -d -f etc. tests here
         if ($key eq 'dir') {
@@ -62,6 +72,7 @@ sub _inputFile {
     #realpath works only for existing files (implicit -f test)
     $file = realpath($file);    #absolute path...
     if (-f $file) {
+
         #print "....................$file\n";
         #print Dumper $self->core->plugin_system;
         my $sc = $self->core->plugin_system->get_plugin('ScanCompare')
@@ -72,9 +83,13 @@ sub _inputFile {
 }
 
 sub _inputDir {
-    my $self = shift or return " Need myself ";
+    my $self = shift or return "Need myself";
     my $dir  = shift or return;
     my $recursive = shift || 1;
+    if ($self->_seen->{$dir}++) {
+        return;
+    }
+        #$self->core->log("see dir $dir");
 
     #my very first manual recursive directory lookup. Yay!
     #$self->log_debug ("readdir $dir");

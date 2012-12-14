@@ -125,6 +125,7 @@ sub scan_input {
       or confess 'Cannot get plugin';
 
     $scan->start();
+    return 1;
 }
 
 
