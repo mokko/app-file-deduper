@@ -18,9 +18,9 @@ if (-e $dbfile) {
 }
 
 #testing
-use_ok('File::Dedupe::Store::One');
+use_ok('File::Dedupe::Plugin::Store::One');
 
-my $store = File::Dedupe::Store::One->new(dbfile => $dbfile);
+my $store = File::Dedupe::Plugin::Store::One->new(dbfile => $dbfile);
 ok($store, 'new succeeds');
 
 ok ($store->create($0), 'simple create');

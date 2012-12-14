@@ -27,7 +27,12 @@ has 'dbh'    => (is => 'ro', isa => 'Object', init_arg => undef);
 =head1 DESCRIPTION
 
 This is my first stab at a store implementation, a straight-forward no-frills
-SQLite store.
+SQLite store. 
+
+A store is an object which provides access to descriptions of files in a 
+database of sorts.
+
+TODO: Role that specifies the interface of stores 
 
 =cut
 

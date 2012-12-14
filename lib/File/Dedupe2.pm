@@ -46,7 +46,6 @@ has 'filelist' => (
 
 );
 
-
 has 'plugin_system' => (
     is      => 'ro',
     isa     => 'Plugin::Tiny',
@@ -65,10 +64,10 @@ sub _build_plugin_system {
 
     #log this to ensure that we're not re-making Plugin::Tiny all over again
     #don't register plugins from within _build_plugin_system -> deep recursion
-    $_[0]->log(__PACKAGE__ . "_build_plugin_system !!!!!!!!!!");
+    $_[0]->log(__PACKAGE__ . "::_build_plugin_system. Only ONCE!");
     Plugin::Tiny->new(
         prefix => 'File::Dedupe::Plugin::',
-        role   => 'File::Dedupe::Role::Plugin'
+        role   => 'File::Dedupe::Role::Plugin',
     );
 }
 
@@ -80,8 +79,7 @@ sub BUILD {
 
     #plugin defaults
     my %plugins = (
-        'Scan'  => 'Scan::Default',
-        #'Store' => 'Store::One',
+        'Scan' => 'Scan::Default',
     );
 
     #load plugins from configuration, overwrite defaults
@@ -96,6 +94,8 @@ sub BUILD {
             plugin => $plugins{$phase},
             core   => $self,
         );
+        my $class = $self->plugin_system->prefix . $plugins{$phase};
+        $self->log_debug("registered '$class' for phase '$phase'");
     }
 
 }
@@ -121,12 +121,10 @@ sub scan_input {
     #can't handover input only since it's an arrayRef
     #currently, plugin has everything,so doesn't matter
 
-    my $scan_bundle = $self->plugin_system->get_plugin('Scan')
+    my $scan = $self->plugin_system->get_plugin('Scan')
       or confess 'Cannot get plugin';
 
-    #return $scan_bundle->do();
-    return 1;
-
+    $scan->start();
 }
 
 

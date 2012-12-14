@@ -2,6 +2,7 @@ package File::Dedupe::Role::Plugin;
 use strict;
 use warnings;
 use Moose::Role;
+use Data::Dumper;
 
 #use Scalar::Util qw(blessed);
 
@@ -15,9 +16,13 @@ register and call new plugins. Plugins calling plugins. Yay!
 
 has 'core' => (is => 'ro', isa => 'File::Dedupe2', required => 1, );
 
-before 'BUILD' => sub {
-    my $self = shift;
-    $self->core->log_debug('before BUILDing plugin ' . ref $self);
-};
+#after 'BUILD' => sub {
+#    my $self = shift;
+#    my $ps=$self->core->plugin_system;
+#    my $class=$ps->class($self) or warn "No plugin class!";
+#    my $phase=$ps->phase($self) or warn "No phase!";
+#    print Dumper keys %{$ps->_registry};
+#    $self->core->log_debug("after BUILDing plugin '$class' for phase '$phase'");
+#};
 
 1;
