@@ -29,9 +29,11 @@ and launches the plugin with the phase 'ScanCampare' on each file it discovers.
 
 =head1 STATUS
 
-For now this works, but in the long run I probably be using File::Find. 
+For now this works ok, but in the long run I probably be using File::Find. 
 However, File::Find also has trouble making sure that each file is encountered
 only one.
+
+Currently, .dotfiles and .dotdirectories are not included.
 
 =cut
 

@@ -67,7 +67,7 @@ has 'config' => (
     builder       => '_build_config',
     required      => 1,
     lazy          => 1,
-    documentation => 'HashRef containing configuration.',
+    documentation => 'HashRef containing configuration',
 );
 
 #load config_file, check if it is good, and write it to $self->{config}
@@ -108,20 +108,10 @@ sub _build_config {
     }
 
     #defaults can be overwritten from configuration file
-    #keep logfile out of configuration file
-    my $mydir = path($ENV{HOME}, '.dedupe');
-    my %defaults = (
-        mydir    => $mydir,
-        dbfile   => path($mydir, 'dedupe.db'),
-        profiles => path($mydir, 'profiles.yml'),
-
-        #useless? Yes, unless I do this config role from App
-
-    );
-
-    foreach my $key (keys %defaults) {
+    my $defaults=defaults();
+    foreach my $key (keys %{$defaults}) {
         if (!$config->{main}{$key}) {
-            $config->{main}{$key} = $defaults{$key};
+            $config->{main}{$key} = $defaults->{$key};
         }
     }
 
@@ -148,10 +138,35 @@ has 'active_profile' => (
 # METHODS
 #
 
+=method defaults
+
+Return default values as hashRef for the main section of the configuration.
+
+=cut
+
+sub defaults {
+
+    #keep logfile out of configuration file
+    my $mydir = path($ENV{HOME}, '.dedupe');
+
+    return {
+        checksum_type => 'MD5',
+        dbfile        => path($mydir, 'dedupe.db'),
+        mydir         => $mydir,
+        profiles      => path($mydir, 'profiles.yml'),
+
+        #useless? Yes, unless I do this config role from App
+
+    };
+}
+
+
 =method my $href=$self->active_config;
-  my $href=$self->active_config($key);
+
 Returns the config hashref for the currently defined profile. Optionally 
 accepts a key to return only part of the current profile.
+  
+  my $href=$self->active_config($key);
 
 =cut
 
@@ -165,7 +180,6 @@ sub active_config {
     }
     return $self->config->{$self->active_profile};
 }
-
 
 
 #

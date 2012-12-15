@@ -86,7 +86,7 @@ has 'logger' => (
 
 has '_caller' => (is => 'ro', isa => 'ArrayRef', init_arg => undef);
 before 'log' => sub {
-    $_[0]->{_caller} = [caller(2)];
+    $_[0]->{_caller} = [caller(2)]; #not good!
 };
 
 

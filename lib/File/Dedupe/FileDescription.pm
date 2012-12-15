@@ -21,7 +21,7 @@ use namespace::autoclean;
     checksum_type=>'MD5',
     lastSeen=>$lastSeen,
     writable=>1,
-    size=>'4512',
+    size=>4512,
     mtime=>$mtime,
     action=>$action', #not required
   ); 

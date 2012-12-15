@@ -1,12 +1,13 @@
 package File::Dedupe::Plugin::Scan::Compare;
 use strict;
 use warnings;
-use Data::Dumper; #debugging
 use Carp 'confess';
-#use Cwd qw(realpath);
-#use Scalar::Util qw(blessed);
 use Moose;
 with 'File::Dedupe::Role::Plugin';
+use Data::Dumper;    #debugging
+
+#use Cwd qw(realpath);
+#use Scalar::Util qw(blessed);
 
 =head1 SYNOPSIS
 
@@ -30,21 +31,46 @@ New file description is necessary if
   for big files: changed mtime or size?
   for small files: changed checksum?
 
-=method $sc->check ($file);
+=method $sc->check ($file_path);
 
 If description is updated, C<see> it returns the new description; otherwise 
 undef.
 
 =cut
 
-sub check {
-    my $self=shift;
-    my $file=shift;
-    print "discovered $file\n";
-}
+#
+# METHODS
+#
 
 sub BUILD {
-    
 }
+
+has 'store' => (
+    is       => 'ro',
+    isa      => 'Object',
+    default  => sub { $_[0]->core->plugin_system->get_plugin('Store') },
+    init_arg => undef,
+);
+
+sub check {
+    my $self = shift;
+    my $path = shift or return;    #absolute or relative is both fine
+    print "discovered $path\n";
+    my $desc = $self->store->read($path);
+    if ($desc) {
+        my $size          = (stat($path))[7];
+        my $mtime         = (stat(_))[9];
+        my $checksum_type = $self->core->config->{main}{checksum_type};
+        $self->store->update($path)
+          if ( $size != $desc->size
+            or $mtime != $desc->mtime
+            or $checksum_type ne $desc->checksum_type);
+    }
+    else { $self->store->create($path) }
+}
+
+#
+# PRIVATE
+#
 
 1;

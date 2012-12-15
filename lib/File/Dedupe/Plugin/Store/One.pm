@@ -44,6 +44,9 @@ sub BUILD {
 }
 
 =method $self->create ($path);
+
+Confesses on serious errors. Return value?
+
 =cut
 
 sub create {
@@ -53,6 +56,7 @@ sub create {
     my $file = File::Dedupe::FileDescription->describe(path => $path);
     my ($stmt, @bind) = SQL::Abstract->new->insert('files', $file->hashref);
     $self->_execute_sql($stmt, @bind);
+    $self->log_debug("Store: read");
 }
 
 
@@ -84,6 +88,7 @@ sub read {
     $sth->execute(@bind) or croak $self->dbh->errstr();
     my $result = $sth->fetchrow_hashref or return;
 
+    $self->log_debug("Store: read");
     return File::Dedupe::FileDescription->new(%{$result});
 }
 
@@ -102,6 +107,8 @@ sub update {
     my ($stmt, @bind) =
       SQL::Abstract->new->update('files', $file->hashref, {path => $path});
     $self->_execute_sql($stmt, @bind);
+    $self->log_debug("Store: updated");
+    
 }
 
 sub delete {
@@ -119,7 +126,7 @@ sub delete {
 sub _initDB {
     my $self = shift;
     my $dbfile = $self->dbfile or confess 'Need dbfile!';
-    $self->log("test log!!!!!!");
+    $self->log_debug("Store: using $dbfile");
 
     #it's perfectly ok if $dbfile doesn't exist. In that case sqlite will
     #create it. We are in trouble only if that file can't be created.
