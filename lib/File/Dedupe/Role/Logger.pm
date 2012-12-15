@@ -84,11 +84,6 @@ has 'logger' => (
     handles => [qw(log log_debug log_fatal)],
 );
 
-has '_caller' => (is => 'ro', isa => 'ArrayRef', init_arg => undef);
-before 'log' => sub {
-    $_[0]->{_caller} = [caller(2)]; #not good!
-};
-
 
 sub _build_logger {
     my $self = shift;
@@ -117,20 +112,8 @@ sub _build_logger {
     }
 
     my $logger = Log::Dispatchouli->new($args);
-    $logger->set_prefix(
-        sub {
-            if ($self->_caller) {
-                return
-                    _interval() . ' '
-                  . $self->_caller->[0]
-                  . ' (line '
-                  . $self->_caller->[2] . '): '
-                  . $_[0];
-            }
-            return _interval() . ' ' . $_[0];
-        }
-    );
-    return $logger;
+    $logger->set_prefix(sub {_interval() . ' ' . $_[0] });
+return $logger;
 }
 
 #

@@ -5,9 +5,9 @@ default:
   description: default profile to check if deduper works
   action: delete
   input:
-   - dir: '/home/maurice/projects/dedupe' #recursive
-   - dir: '/home/maurice/projects/dedupe' #recursive
-   - single_dir: '/home/maurice/projects/dedupe' #only one dir
+   - dir: '/home/maurice/projects/dedupe/lib' #recursive
+   - dir: '/home/maurice/projects/dedupe/bin' #recursive
+   - single_dir: '/home/maurice/projects/dedupe/t' #only one dir
    - file: '/home/maurice/projects/dedupe/README.pod'
 #  strategy: file #optional
   selectmajor: lastModified

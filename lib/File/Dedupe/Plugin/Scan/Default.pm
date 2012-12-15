@@ -28,17 +28,16 @@ sub BUILD {
             dbfile => $self->core->config->{main}{dbfile},
         },
         'Scan::Monitor' => {core => $self->core},
-        'Scan::Compare' => {core => $self->core},
         'Scan::Wipe'    => {core => $self->core},
     };
 
-    $ps->register_bundle($bundle);
+    $ps->register_bundle($bundle); #registers in no particular order
     
     #shortcut for store; 
     #store should implement an interface role... todo
     #N.B. attribute store has small letter while respective phase has capital
-    $self->{store} = $self->core->plugin_system->get_plugin('Store')
-      or confess "Need store!";
+    #$self->{store} = $self->core->plugin_system->get_plugin('Store')
+    #  or confess "Need store!";
 }
 
 

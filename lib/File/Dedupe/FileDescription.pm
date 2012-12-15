@@ -155,7 +155,7 @@ sub describe {
 
     $args{lastSeen}    = time();
     $args{fingerprint} = digest_file_hex($args{path}, $args{checksum_type});
-    $args{writable}    = -w $args{path};
+    $args{writable}    = -w $args{path}||0;
     $args{size}        = (stat($args{path}))[7];
     $args{mtime}       = (stat(_))[9];
     return __PACKAGE__->new(%args);

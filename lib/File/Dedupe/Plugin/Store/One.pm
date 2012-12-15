@@ -148,7 +148,7 @@ sub _initDB {
        'mtime' INTEGER NOT NULL,
        'size' INTEGER NOT NULL,
 
-       'writable' INTEGER NOT NULL,
+       'writable' INTEGER, 
        'action' INTEGER
     )/;
 
