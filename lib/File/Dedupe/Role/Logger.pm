@@ -101,42 +101,57 @@ sub _build_logger {
     #a) Keep logging info out of configuration file
     #b) allow to configure path when logger is loaded by using attr
     my $args = {
-        ident     => __PACKAGE__,            #not sure about package yet...
-        to_file   => 1,
-        to_stdout => 1,
-        log_path  => @{$self->logfile}[0],
-        log_file  => @{$self->logfile}[1],
-        log_pid   => 0,
+        ident   => __PACKAGE__,    #not sure about package
+        log_pid => 0,
     };
 
-    $args->{debug} = 1 if ($self->{debug});
+    if ($self->logfile) {
+        $args->{to_file}  = 1;
+        $args->{log_path} = @{$self->logfile}[0];
+        $args->{log_file} = @{$self->logfile}[1];
+    }
+
+    if ($self->{debug}) {
+        $args->{debug}     = 1;
+        $args->{to_stdout} = 1;
+    }
+
     my $logger = Log::Dispatchouli->new($args);
     $logger->set_prefix(
         sub {
             if ($self->_caller) {
                 return
-                    interval() . ' '
+                    _interval() . ' '
                   . $self->_caller->[0]
                   . ' (line '
                   . $self->_caller->[2] . '): '
                   . $_[0];
             }
-            return interval() . ' ' . $_[0];
+            return _interval() . ' ' . $_[0];
         }
     );
     return $logger;
 }
 
+#
+# METHODS
+#
+
+#Logger role seems not the right place, but not sure where to put it
+sub path {    #function!
+    File::Spec->catfile(@_);
+}
+
+#
+# PRIVATE
+#
+
 #shamelessly from Dancer::Timer. Thanks!
-sub interval {
+sub _interval {    #function
     my $now = [gettimeofday()];
     my $delay = tv_interval($start_time, $now);
     return sprintf('%0f', $delay);
 }
 
-#Logger role seems not the right place, but not sure what should be right place...
-sub path {    #function!
-    File::Spec->catfile(@_);
-}
 
 1;
