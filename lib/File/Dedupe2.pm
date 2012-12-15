@@ -64,10 +64,11 @@ sub _build_plugin_system {
 
     #log this to ensure that we're not re-making Plugin::Tiny all over again
     #don't register plugins from within _build_plugin_system -> deep recursion
-    $_[0]->log(__PACKAGE__ . "::_build_plugin_system. Only ONCE!");
+    $_[0]->log("Only ONCE!");
     Plugin::Tiny->new(
         prefix => 'File::Dedupe::Plugin::',
         role   => 'File::Dedupe::Role::Plugin',
+        debug =>0,
     );
 }
 
@@ -79,7 +80,7 @@ sub BUILD {
 
     #plugin defaults
     my %plugins = (
-        'Scan' => 'Scan::Default',
+        'Scan' => 'Scan::Default', #bundle
     );
 
     #load plugins from configuration, overwrite defaults
@@ -94,8 +95,9 @@ sub BUILD {
             plugin => $plugins{$phase},
             core   => $self,
         );
-        my $class = $self->plugin_system->prefix . $plugins{$phase};
-        $self->log_debug("registered '$class' for phase '$phase'");
+        #my $class = $self->plugin_system->prefix . $plugins{$phase};
+        #this logs only top level of plugins, not plugins called from plugins
+        #$self->log_debug("registered '$class' for phase '$phase'");
     }
 
 }

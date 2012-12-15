@@ -34,14 +34,11 @@ our $start_time = [gettimeofday()];
 
 =head1 DESCRIPTION
 
-We need comfortable logging on screen (STDOUT) and to file. Let's try and see 
-if Log::Dispatchouli works in this case. 
-
-Should this be a base class? Or a role, so that all our classes can use it?
+A thin wrapper around Log::Dispatchouli.  
 
 =attr debug
 
-debug is a read-only boolean which defaults to 0. 
+a read-only boolean which defaults to 0. 
 
 If you need to change the debug setting during
 runtime use $self->{logger}->set_debug ($bool) instead.

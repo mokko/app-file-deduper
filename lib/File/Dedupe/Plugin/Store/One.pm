@@ -11,6 +11,7 @@ use SQL::Abstract;    #SQL is just too cross to write it manually...
 use Data::Dumper;     #only debugging
 use File::Dedupe::FileDescription;
 use Moose;
+with 'File::Dedupe::Role::Logger';
 use namespace::autoclean;
 
 has 'dbfile' => (is => 'ro', isa => 'Str',    required => 1);
@@ -118,11 +119,13 @@ sub delete {
 sub _initDB {
     my $self = shift;
     my $dbfile = $self->dbfile or confess 'Need dbfile!';
+    $self->log("test log!!!!!!");
 
     #it's perfectly ok if $dbfile doesn't exist. In that case sqlite will
     #create it. We are in trouble only if that file can't be created.
-    warn "dbfile '$dbfile' does not exist" if (!-f $dbfile);
-
+    if (!-f $dbfile) {
+        $self->log_debug("dbfile '$dbfile' does not exist");
+    }
     $self->{dbh} = DBI->connect("dbi:SQLite:dbname=$dbfile", "", "");
 
     #$dbh->do("PRAGMA cache_size = 8000");

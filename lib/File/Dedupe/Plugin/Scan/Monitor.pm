@@ -27,13 +27,20 @@ part of the Scan::Default plugin bundle.
 It scans the monitored directories of the active profile (described by input) 
 and launches the plugin with the phase 'ScanCampare' on each file it discovers.
 
+=head1 STATUS
+
+For now this works, but in the long run I probably be using File::Find. 
+However, File::Find also has trouble making sure that each file is encountered
+only one.
+
 =cut
 
 has '_seen' => (
     is       => 'ro',
     isa      => 'HashRef',
     default  => sub { {} },
-    init_arg => undef
+    init_arg => undef,
+    documentation=> 'parse each directory only once',
 );
 
 #

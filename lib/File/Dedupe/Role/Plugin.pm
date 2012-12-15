@@ -14,15 +14,14 @@ register and call new plugins. Plugins calling plugins. Yay!
 
 =cut
 
-has 'core' => (is => 'ro', isa => 'File::Dedupe2', required => 1, );
+has 'core' => (is => 'ro', isa => 'File::Dedupe2', required => 1,);
 
-#after 'BUILD' => sub {
-#    my $self = shift;
-#    my $ps=$self->core->plugin_system;
-#    my $class=$ps->class($self) or warn "No plugin class!";
-#    my $phase=$ps->phase($self) or warn "No phase!";
-#    print Dumper keys %{$ps->_registry};
-#    $self->core->log_debug("after BUILDing plugin '$class' for phase '$phase'");
-#};
+before 'BUILD' => sub {
+
+#works only for those plugs which use this role
+my $self = shift;
+$self->core->log('Enter BUILD'); 
+#if you want log message for all plugs use Plugin::Tiny->new (debug=>1)
+};
 
 1;

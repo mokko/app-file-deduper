@@ -49,6 +49,6 @@ my $file2 = File::Dedupe::FileDescription->new(
 );
 
 
-print Dumper $file2;
+#print Dumper $file2;
 
 done_testing;

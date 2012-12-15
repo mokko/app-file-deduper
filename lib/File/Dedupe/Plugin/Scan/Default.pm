@@ -4,6 +4,7 @@ use warnings;
 use Data::Dumper;    #debugging
 use Carp 'confess';
 use Cwd qw(realpath);
+use Plugin::Tiny;
 use Moose;
 with 'File::Dedupe::Role::Plugin';    #requires core...
 
@@ -18,38 +19,33 @@ with 'File::Dedupe::Role::Plugin';    #requires core...
 sub BUILD {
     my $self = shift;
     my $ps   = $self->core->plugin_system;
+    
+    my $bundle = {
+        'Store::One' => {
+            phase  => 'Store',
+            role   => undef,
+            logger => $self->core->logger,
+            dbfile => $self->core->config->{main}{dbfile},
+        },
+        'Scan::Monitor' => {core => $self->core},
+        'Scan::Compare' => {core => $self->core},
+        'Scan::Wipe'    => {core => $self->core},
+    };
 
-    $ps->register(    #doesn't log now, because it doesn't use the role...
-        phase  => 'Store',
-        plugin => 'Store::One',
-        role   => undef,
-        dbfile => $self->core->config->{main}{dbfile},
-    );
-
-    $ps->register(
-        plugin => 'Scan::Monitor',
-        core   => $self->core
-    );
-    $ps->register(
-        plugin => 'Scan::Compare',
-        core   => $self->core
-    );
-    $ps->register(
-        plugin => 'Scan::Wipe',
-        core   => $self->core
-    );
-
-    #shortcut for store; store should implement an interface role... todo
-    #N.B. attribute store has small letter while respective phase has capital.
+    $ps->register_bundle($bundle);
+    
+    #shortcut for store; 
+    #store should implement an interface role... todo
+    #N.B. attribute store has small letter while respective phase has capital
     $self->{store} = $self->core->plugin_system->get_plugin('Store')
       or confess "Need store!";
-
 }
 
 
 sub start {
-    my $self=shift;
-    my $monitor=$self->core->plugin_system->get_plugin('ScanMonitor') or confess "Need monitor";
+    my $self    = shift;
+    my $monitor = $self->core->plugin_system->get_plugin('ScanMonitor')
+      or confess "Need monitor";
     $monitor->scan;
 }
 
