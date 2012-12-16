@@ -144,7 +144,7 @@ sub _initDB {
        'fingerprint' TEXT NOT NULL,
        'checksum_type' TEXT NOT NULL,
 
-       'lastSeen' INTEGER NOT NULL,
+       'created' INTEGER NOT NULL,
        'mtime' INTEGER NOT NULL,
        'size' INTEGER NOT NULL,
 

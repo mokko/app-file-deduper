@@ -13,11 +13,8 @@ with 'File::Dedupe::Role::Plugin';
     #register plugin somewhere (probably in bundle plugin)
     my $wiper=$plugin_system->get_plugin('ScanWipe');
 
-    #record the time of the monitoring
-    $wiper->time_monitoring;
-
     #delete descriptions which no longer have file in monitored directories
-    $wipe->clear;
+    $wipe->wipe;
 
 =head1 DESCRIPTION
 
@@ -29,14 +26,11 @@ items have been processed. The wiper goes thru the descriptions in the store
 and removes those which are no longer in the monitored directories on the 
 harddisk.
 
-It does so by comparing lastSeen time with the time of the most recent 
-monitoring.
+This wiper does file checks on each every item in store.
 
 =cut
 
-sub time_monitoring {}
 
-sub clear {}
 
 sub BUILD {
 }
