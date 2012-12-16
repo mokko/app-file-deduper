@@ -7,6 +7,15 @@ use Log::Dispatchouli;
 use Moose::Role;
 use Time::HiRes 'gettimeofday', 'tv_interval';
 
+#as per http://stackoverflow.com/questions/13895306/whos-calling-with-moose
+use Carp;
+#our @CARP_NOT = qw(
+#  File::Dedupe::Role::Logger Try::Tiny
+#);
+$Carp::Internal{"Log::Dispatchouli"}++;
+$Carp::Internal{"Moose::Meta::Method::Delegation"}++;
+
+
 #use Data::Dumper;
 #starts timer only when Role::Logger is applied, but who cares...
 our $start_time = [gettimeofday()];
@@ -112,8 +121,11 @@ sub _build_logger {
     }
 
     my $logger = Log::Dispatchouli->new($args);
-    $logger->set_prefix(sub {_interval() . ' ' . $_[0] });
-return $logger;
+    $logger->set_prefix(
+        sub { Carp::carp _interval().' '.$_[0]."\n" }
+    );
+
+    return $logger;
 }
 
 #
@@ -121,7 +133,7 @@ return $logger;
 #
 
 #Logger role seems not the right place, but not sure where to put it
-sub path {    #function!
+sub path {                                              #function!
     File::Spec->catfile(@_);
 }
 
@@ -130,7 +142,7 @@ sub path {    #function!
 #
 
 #shamelessly from Dancer::Timer. Thanks!
-sub _interval {    #function
+sub _interval {                                         #function
     my $now = [gettimeofday()];
     my $delay = tv_interval($start_time, $now);
     return sprintf('%0f', $delay);
