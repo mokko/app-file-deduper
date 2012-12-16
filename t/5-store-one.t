@@ -6,6 +6,7 @@ use Test::More;
 use FindBin;
 use File::Spec;
 use Data::Dumper;    #debugging
+use Try::Tiny;
 
 #preparation & cleanup: this test uses its own db file
 my $tmp_dir = File::Spec->catfile($FindBin::Bin, 'tmp');
@@ -28,6 +29,11 @@ ok($store, 'new succeeds');
 #print Dumper $store;
 ok($store->create($0),      'simple create');           #relative path?
 ok($store->create($dbfile), 'another simple create');
+#try {
+#    $store->create($dbfile);
+#} 
+#finally { ok($_, 'repeated created fails as expected') };
+
 
 {
     my $file = $store->read($0);
@@ -40,7 +46,9 @@ ok($store->update($0),      'simple update');
 ok($store->delete($dbfile), 'simple delete');
 
 note "iterate";
+$store->create($dbfile); #so we have two files in db
 
-ok($store->iterate, 'iterate');
+my $anonsub=sub { print "bla" . Dumper $_. "\n" };
+ok($store->iterate($anonsub), 'iterate');
 
 done_testing;

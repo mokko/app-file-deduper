@@ -79,11 +79,11 @@ sub read {
     }
 
     #I could get this list of fields from FileDescription
-    my @fields = qw(path fingerprint checksum_type created mtime
-      size writable action
-    );
+    #my @fields = qw(path fingerprint checksum_type created mtime
+    #  size writable action
+    #);
     my ($stmt, @bind) =
-      SQL::Abstract->new->select('files', \@fields, {path => $path});
+      SQL::Abstract->new->select('files', '*', {path => $path});
 
     $self->log_debug("Store read: $path");
     my $result = $self->dbh->selectrow_hashref($stmt, undef, @bind) or return;
@@ -125,17 +125,20 @@ sub delete {
 
 =method $self->iterate(sub{#do_something});
 
+Code for iterate is partly copied from ORLite. Thanks!
 
 =cut
 
 sub iterate {
     my $self = shift;
-    my $sub  = shift or return;
+    my $call  = shift or return;
     my $stmt = 'SELECT * FROM files';
-    my $sth  = $self->_execute_sql($stmt);
-    $sth->fetchrow_array($sth);
-
-    return $sth;
+    my $sth=$self->dbh->prepare($stmt) or confess "Wrong!";
+    $sth->execute or confess "Wrong!";
+    while ($_=$sth->fetchrow_arrayref) {
+        $call->() or return 1; 
+    }
+    return 1;
 }
 
 
