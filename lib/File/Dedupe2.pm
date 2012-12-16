@@ -16,15 +16,9 @@ with 'File::Dedupe::Role::Config';
         config_file=>$config_file,  #or: file with configuration
         logfile=>[$logdir, $logfile]#optional
     );     
-    
-    #preliminary
-    $deduper->scan_input; #dies or report error on failure? 
 
     #update description in db for given input
     $deduper->scan() or die "Warning"; 
-
-    #forgot what wipe does; might be
-    $deduper->wipe()
 
     #make and show a plan
     my $tdl=$deduper->plan ();  #make a plan
@@ -126,7 +120,7 @@ sub scan_input {
     my $scan = $self->plugin_system->get_plugin('Scan')
       or confess 'Cannot get plugin';
 
-    $scan->start();
+    $scan->start(); #return value?
     return 1;
 }
 

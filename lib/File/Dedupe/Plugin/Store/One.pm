@@ -152,17 +152,10 @@ sub _initDB {
        'action' INTEGER
     )/;
 
+    #currently lastSeen is not really lastSeen. It gets updated only when the
+    #description gets updated and not every time.
+
     $self->dbh->do($sql) or confess $self->dbh->errstr;
-}
-
-
-sub _execute_sql {
-    my $self = shift;
-    my $stmt = shift or confess "Need statement!";
-
-    my $sth = $self->dbh->prepare($stmt);
-    $sth->execute(@_)
-      or confess $stmt. "\n@_\n";
 }
 
 
@@ -170,9 +163,13 @@ sub _execute_sql {
 #might be better placed in File::Dedupe::FileDescription
 sub _realpath {
     my $path = shift or confess("Need path!");
-    if (!File::Spec->file_name_is_absolute($path)) {
-        return realpath($path);
-    }
+
+    #I wonder what's more expensive: a call to file_name_is_absolute or
+    #a call to realpath ...
+    #if (!File::Spec->file_name_is_absolute($path)) {
+    return realpath($path);
+
+    #}
     return $path;
 }
 

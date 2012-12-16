@@ -19,7 +19,7 @@ use namespace::autoclean;
   $file=File::Dedupe::FileDescription->new(
     path=>$realpath,
     checksum_type=>'MD5',
-    lastSeen=>$lastSeen,
+    created=>$created,
     writable=>1,
     size=>4512,
     mtime=>$mtime,
@@ -30,7 +30,7 @@ use namespace::autoclean;
   $file->path; #returns absolute 'real' path
   $file->checksum_type; #string
   $file->fingerprint; #hash
-  $file->lastSeen; #seconds since epoch    
+  $file->created; #seconds since epoch    
   $file->writable; #boolean
   $file->size; #bytes
   $file->mtime; #seconds since epoch
@@ -49,8 +49,6 @@ The only way to update a FileDescription is to make a new one. We don't want
 setters for most of the attributes. Either the file is the same or we need a 
 new  description (thru ->describe). 
 
-Perhaps I will make an exception for lastSeen in the future. Probably not.
-  
 =attr path
 
 accepts only valid paths, both absolute and relative ones, but stores absolute 
@@ -78,7 +76,7 @@ Choose one of the types available for Digest::file, e.g. 'MD5'. Default is
 
 has 'checksum_type' => (is => 'ro', isa => 'Str', required => 1);
 
-=method $self->lastSeen
+=method $self->created
 
 default gets called when a new object is made. 
 
@@ -86,7 +84,7 @@ Is it read only? Or should we be able to update the file?
 
 =cut
 
-has 'lastSeen' => (
+has 'created' => (
     is       => 'ro',
     isa      => 'Int',
     required => 1,
@@ -129,13 +127,12 @@ has 'writable' => (
 
 =method my $file=File::Dedupe::FileDescription->describe(path=>$path);
 
-Alternative constructor. You need path and you may specify checksum_type, all
+Alternative constructor. Needs a path and optionally accepts a checksum_type, 
 other values are filled-in automatically from the file that needs to be 
 described.
 
-=head3 Options
   path=>$path
-  checksum_type=>'MD5'; #see attribute above
+  checksum_type=>'MD5'; #see above
 
 =cut
 
@@ -153,7 +150,7 @@ sub describe {
         $args{checksum_type} = 'MD5';    #default value
     }
 
-    $args{lastSeen}    = time();
+    $args{created}    = time();
     $args{fingerprint} = digest_file_hex($args{path}, $args{checksum_type});
     $args{writable}    = -w $args{path}||0;
     $args{size}        = (stat($args{path}))[7];
