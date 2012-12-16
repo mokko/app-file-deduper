@@ -55,8 +55,9 @@ sub create {
 
     my $file = File::Dedupe::FileDescription->describe(path => $path);
     my ($stmt, @bind) = SQL::Abstract->new->insert('files', $file->hashref);
-    $self->_execute_sql($stmt, @bind);
-    $self->log_debug("Store: read");
+    $self->log_debug("Store create: $path");    #doesn't return true...
+    $self->dbh->selectrow_array($stmt, undef, @bind);
+    return 1;
 }
 
 
@@ -78,17 +79,14 @@ sub read {
     }
 
     #I could get this list of fields from FileDescription
-    my @fields = qw(path fingerprint checksum_type lastSeen mtime
+    my @fields = qw(path fingerprint checksum_type created mtime
       size writable action
     );
     my ($stmt, @bind) =
       SQL::Abstract->new->select('files', \@fields, {path => $path});
 
-    my $sth = $self->dbh->prepare($stmt);
-    $sth->execute(@bind) or croak $self->dbh->errstr();
-    my $result = $sth->fetchrow_hashref or return;
-
-    $self->log_debug("Store: read");
+    $self->log_debug("Store read: $path");
+    my $result = $self->dbh->selectrow_hashref($stmt, undef, @bind) or return;
     return File::Dedupe::FileDescription->new(%{$result});
 }
 
@@ -99,23 +97,45 @@ Expects an existing relative or absolute path.
 
 =cut
 
-
 sub update {
     my $self = shift;
     my $path = _realpath(shift) or return;
     my $file = File::Dedupe::FileDescription->describe(path => $path);
     my ($stmt, @bind) =
       SQL::Abstract->new->update('files', $file->hashref, {path => $path});
-    $self->_execute_sql($stmt, @bind);
-    $self->log_debug("Store: updated");
-    
+    $self->log_debug("Store update: $path");
+    $self->dbh->selectrow_array($stmt, undef, @bind);
+    return 1;
 }
+
+
+=method delete
+
+=cut
 
 sub delete {
     my $self = shift;
     my $path = shift or return;
     my ($stmt, @bind) = SQL::Abstract->new->delete('files', {path => $path});
-    $self->_execute_sql($stmt, @bind);
+    $self->log_debug("Store: deleted $path");
+    $self->dbh->selectrow_array($stmt, undef, @bind);
+    return 1;
+}
+
+
+=method $self->iterate(sub{#do_something});
+
+
+=cut
+
+sub iterate {
+    my $self = shift;
+    my $sub  = shift or return;
+    my $stmt = 'SELECT * FROM files';
+    my $sth  = $self->_execute_sql($stmt);
+    $sth->fetchrow_array($sth);
+
+    return $sth;
 }
 
 
