@@ -24,6 +24,20 @@ with 'File::Dedupe::Role::Config';
 
     #carry out the plan
     my $deduper->do();
+
+=head1 DESCRIPTION
+
+todo
+
+=head1 INHERITANCE
+
+Inherits from
+
+=over 
+
+=item Role L<File::Dedupe::Role::Config>
+    
+=back    
     
 =attr file_list
 
