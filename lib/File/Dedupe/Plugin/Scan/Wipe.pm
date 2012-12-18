@@ -1,8 +1,10 @@
 package File::Dedupe::Plugin::Scan::Wipe;
 use strict;
 use warnings;
-use Data::Dumper; #debugging
+use Data::Dumper;    #debugging
 use Carp 'confess';
+use File::Dedupe::FileDescription;
+
 #use Cwd qw(realpath);
 #use Scalar::Util qw(blessed);
 use Moose;
@@ -26,13 +28,29 @@ items have been processed. The wiper goes thru the descriptions in the store
 and removes those which are no longer in the monitored directories on the 
 harddisk.
 
-This wiper does file checks on each every item in store.
+This wiper does file checks on each and every item in store.
 
 =cut
 
 
-
 sub BUILD {
+}
+
+sub wipe {
+    my $self  = shift;
+    my $store = $self->core->plugin_system->get_plugin('Store')
+      or confess "Need store";
+    $store->iterate(
+        sub {
+            my $file = $_;
+
+            #print Dumper $file;
+            if (!-f $file->path) {
+                print "\n... delete from store " . $file->path . "\n";
+                $store->delete($file->path);
+            }
+        }
+    );
 }
 
 1;

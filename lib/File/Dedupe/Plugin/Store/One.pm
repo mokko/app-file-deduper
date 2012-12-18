@@ -135,7 +135,8 @@ sub iterate {
     my $stmt = 'SELECT * FROM files';
     my $sth=$self->dbh->prepare($stmt) or confess "Wrong!";
     $sth->execute or confess "Wrong!";
-    while ($_=$sth->fetchrow_arrayref) {
+    while ($_=$sth->fetchrow_hashref) {
+        $_=File::Dedupe::FileDescription->new(%{$_});
         $call->() or return 1; 
     }
     return 1;

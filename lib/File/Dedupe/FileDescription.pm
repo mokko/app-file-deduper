@@ -6,6 +6,7 @@ use Digest::file 'digest_file_hex';
 use Cwd 'realpath';
 use Moose;
 use namespace::autoclean;
+
 #with 'File::Dedupe::Role::Types';    #not necessary due to Moose's global types
 
 =head1 SYNOPSIS
@@ -17,49 +18,40 @@ use namespace::autoclean;
 
   #restore fileDescription with info saved saved in db etc.
   $file=File::Dedupe::FileDescription->new(
-    path=>$realpath,
+    path=>'path/to/file',
     checksum_type=>'MD5',
-    created=>$created,
+    created=>123456789,
     writable=>1,
     size=>4512,
-    mtime=>$mtime,
-    action=>$action', #not required
+    mtime=>12345678,
+    action=>'delete', #not required
   ); 
 
-  #getters
-  $file->path; #returns absolute 'real' path
-  $file->checksum_type; #string
-  $file->fingerprint; #hash
-  $file->created; #seconds since epoch    
-  $file->writable; #boolean
-  $file->size; #bytes
-  $file->mtime; #seconds since epoch
+  #only getters; no setters
+  my $path=$file->path; #same for other attributes
   
   #other
-  $file->action; #not sure about that yet; not really a file description
-
-  #setters
-  $file->action ('bla');  
-  
   my $href=$file->hashref; #return content as hashref 
 
-=head1 DESCRIPTION / QUESTIONS
+=head1 DESCRIPTION 
 
-The only way to update a FileDescription is to make a new one. We don't want 
-setters for most of the attributes. Either the file is the same or we need a 
-new  description (thru ->describe). 
+=head2 No Updates
+
+The only way to update a FileDescription is to make a new description. There 
+are no setters. Either the file is still in the same state or we make a new
+description (thru C<describe>). 
 
 =attr path
 
-accepts only valid paths, both absolute and relative ones, but stores absolute 
-paths (realpath) internally. It resolves symbolic links and relative path
-components (like '..'). Path functions here the id for the file. Paths are 
-unique.
+accepts only valid paths, both absolute and relative ones. Internally paths are
+always transformed to absolute ones and only absolute paths are returned. 
+FileDescription resolves symbolic links and relative path components 
+(like '..'). C<path> functions here the id for the file. Paths are unique.
 
 =cut
 
 #realpath only works for existing files, so I don't have to check
-#existence before. And cwd's error message is decent!
+#existence separately. And cwd's error message is decent!
 has 'path' => (
     is       => 'ro',
     isa      => 'Str',
@@ -69,18 +61,15 @@ has 'path' => (
 
 =attr checksum_type
 
-Choose one of the types available for Digest::file, e.g. 'MD5'. Default is
-'SHA-512'.
+Choose a hash logarithm. See L<Digest::file>. Default is 'MD-5'. 
 
 =cut
 
 has 'checksum_type' => (is => 'ro', isa => 'Str', required => 1);
 
-=method $self->created
+=attr created
 
-default gets called when a new object is made. 
-
-Is it read only? Or should we be able to update the file?
+time when the description was first made in seconds since epoch.
 
 =cut
 
@@ -90,7 +79,7 @@ has 'created' => (
     required => 1,
 );
 
-=method action
+=attr action
 =cut 
 
 has 'action' => (is => 'rw', isa => 'Maybe[Str]');    #allow undef
@@ -102,6 +91,9 @@ has 'fingerprint' => (
     required => 1,
 );
 
+=attr mtime
+
+=cut
 
 has 'mtime' => (
     is       => 'ro',
@@ -109,11 +101,19 @@ has 'mtime' => (
     required => 1,
 );
 
+=attr size
+
+=cut
+
 has 'size' => (
     is       => 'ro',
     isa      => 'Int',
     required => 1,
 );
+
+=attr writable
+
+=cut
 
 has 'writable' => (
     is       => 'rw',
@@ -139,7 +139,8 @@ described.
 sub describe {
     my $class = shift;
     my %args  = @_;      #unvalidated hash is handed over to new...
-    $args{action}=undef;    #a description made from describe never has action
+    $args{action} = undef;    #a description made from describe never has action
+
     #path is required
     if (!$args{path}) {
         confess "Need path!";
@@ -150,9 +151,9 @@ sub describe {
         $args{checksum_type} = 'MD5';    #default value
     }
 
-    $args{created}    = time();
+    $args{created}     = time();
     $args{fingerprint} = digest_file_hex($args{path}, $args{checksum_type});
-    $args{writable}    = -w $args{path}||0;
+    $args{writable}    = -w $args{path} || 0;
     $args{size}        = (stat($args{path}))[7];
     $args{mtime}       = (stat(_))[9];
     return __PACKAGE__->new(%args);
@@ -168,15 +169,13 @@ TODO: Check!
 =cut
 
 sub hashref {
-    my $self=shift;
-    my $href={};    
-    for my $attr ( __PACKAGE__->meta->get_all_attributes ) {
-      my $aname=$attr->name;
-      #don't put action in href if it doesn't exist
-      $href->{$aname}=$self->$aname if $self->$aname; 
-  }
+    my $href = {};
+    for my $attr (__PACKAGE__->meta->get_all_attributes) {
+        my $aname = $attr->name;
+        $href->{$aname} = $_[0]->$aname if $_[0]->$aname;
+    }
 
-  return $href;
+    return $href;
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -18,7 +18,7 @@ is($file->size,  (stat($0))[7]);
 is($file->mtime, (stat($0))[9]);
 ok($file->fingerprint, 'fp exists');
 
-print Dumper $file;
+#print Dumper $file;
 
 #what happens if a file doesn't exist?
 try {
@@ -41,7 +41,7 @@ catch { pass "FileDescription fails on non-existing file as expected" };
 my $file2 = File::Dedupe::FileDescription->new(
     checksum_type => $file->checksum_type,
     fingerprint   => $file->fingerprint,
-    lastSeen      => $file->lastSeen,
+    created      => $file->created,
     mtime         => $file->mtime,
     path          => $file->path,
     size          => $file->size,

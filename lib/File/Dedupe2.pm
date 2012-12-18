@@ -7,7 +7,6 @@ use Plugin::Tiny;
 use Moose;
 with 'File::Dedupe::Role::Config';
 
-
 =head1 SYNOPSIS
 
     use File::Dedupe;

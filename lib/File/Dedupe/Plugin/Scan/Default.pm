@@ -74,6 +74,9 @@ sub start {
     my $monitor = $self->core->plugin_system->get_plugin('ScanMonitor')
       or confess "Need monitor";
     $monitor->scan;
+    my $wiper = $self->core->plugin_system->get_plugin('ScanWipe')
+      or confess "Need wiper";
+    $wiper->wipe;
 }
 
 1;
