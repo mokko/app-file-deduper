@@ -14,7 +14,7 @@ register and call new plugins. Plugins calling plugins. Yay!
 
 =cut
 
-has 'core' => (is => 'ro', isa => 'File::Dedupe2', required => 1,);
+has 'core' => (is => 'ro', isa => 'File::Dedupe', required => 1,);
 
 before 'BUILD' => sub {
 

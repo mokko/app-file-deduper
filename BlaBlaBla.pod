@@ -1,0 +1,22 @@
+=pod
+
+=head1 WHAT
+
+App::Dedupe is modular tool that identifies and deals with duplicate files on 
+your harddisk. 
+
+App::Dedupe wants to serve a real-world purpose, but I wrote it mainly to 
+practice modern perl. So if successful to App::Dedupe should also demonstrate 
+modern perl. 
+
+Also, I think there should be more apps which really help in the real world 
+on CPAN. Like L<App::cpanminus>. It comes and helps out-of-the-box with high-
+quality code. Let's make perl even more useful!
+
+In particular, App::Dedupe wants to be modular and extandable. It uses plugins 
+so you can quickly and efficiently replace some functionality with your own 
+without having to fork the project or to write all parts again. Here my model
+is Dist::Zilla's plugin system.
+
+
+

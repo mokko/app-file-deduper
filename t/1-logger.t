@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 use Scalar::Util qw(blessed);
-use File::Dedupe2;
+use File::Dedupe;
 
 #use Data::Dumper;
 package Try; #logger only
@@ -25,7 +25,7 @@ use FindBin;
 my $file = File::Spec->catfile($FindBin::Bin, '..', 'profiles.yml');
 
 my $one = Try->new(debug => 1) or die "Cant make one";
-my $two = File::Dedupe2->new(debug => 0, config_file => $file)
+my $two = File::Dedupe->new(debug => 0, config_file => $file)
   or die "Cant make two";
 ok ($one, "one exists".$one);
 ok ($two, "two exists".$two);

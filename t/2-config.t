@@ -8,7 +8,7 @@ use FindBin;
 use File::Spec;
 use Data::Dumper;
 use Scalar::Util qw(blessed);
-use File::Dedupe2;
+use File::Dedupe;
 
 package TrialConfig;
 use Moose; 
@@ -20,7 +20,7 @@ package main;
 my $file = File::Spec->catfile($FindBin::Bin, '..', 'profiles.yml');
 #could be two different config files, so it's good to load twice
 my $obj1 = TrialConfig->new(config_file => $file, debug => 1);
-my $obj2 = File::Dedupe2->new(config_file => $file, debug => 1);
+my $obj2 = File::Dedupe->new(config_file => $file, debug => 1);
 
 foreach my $self ($obj2, $obj1) {
     
